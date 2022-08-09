@@ -14,12 +14,9 @@ StripeConfiguration.AppInfo = new AppInfo
 
 StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args,
-    WebRootPath = Environment.GetEnvironmentVariable("STATIC_DIR")
-});
+var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddRazorPages();
 builder.Services.Configure<StripeOptions>(options =>
 {
     options.PublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
@@ -120,7 +117,7 @@ app.MapPost("/webhook", async (HttpRequest request, IOptions<StripeOptions> opti
              options.Value.WebhookSecret
         );
         app.Logger.LogInformation($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
-        
+
         if (stripeEvent.Type == "payment_intent.succeeded")
         {
             var intentData = stripeEvent.Data.Object as PaymentIntent;
@@ -147,5 +144,7 @@ app.MapPost("/webhook", async (HttpRequest request, IOptions<StripeOptions> opti
 
     return Results.Ok();
 });
+
+app.MapRazorPages();
 
 app.Run();
